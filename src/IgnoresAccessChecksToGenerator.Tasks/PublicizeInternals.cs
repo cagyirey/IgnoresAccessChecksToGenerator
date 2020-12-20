@@ -94,19 +94,16 @@ namespace IgnoresAccessChecksToGenerator.Tasks
             var attributes = string.Join(Environment.NewLine,
                 assemblyNames.Select(a => $@"[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(""{a}"")]"));
 
-            var content = attributes + @"
-
+            var content = @"
 namespace System.Runtime.CompilerServices
-{
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    internal sealed class IgnoresAccessChecksToAttribute : Attribute
-    {
-        public IgnoresAccessChecksToAttribute(string assemblyName)
-        {
-        }
-    }
-}";
-            var filePath = Path.Combine(path, "IgnoresAccessChecksTo.cs");
+
+open System
+
+type IgnoreAccessChecksTo(assemblyName: string) =
+    inherit Attribute()
+
+    member _.AssemblyName = assemblyName\n" + attributes + "\ndo ()";
+            var filePath = Path.Combine(path, "IgnoresAccessChecksTo.fs");
             File.WriteAllText(filePath, content);
 
             GeneratedCodeFiles = new ITaskItem[] { new TaskItem(filePath) };
